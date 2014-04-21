@@ -1609,14 +1609,17 @@ interHTTPAdapters.map(function (adapters) {
             }
             if (count === 4) {
               replicate.cancel();
-              remote.put(doc2);
-              // This setTimeout is needed to ensure no further changes come
-              // through
+              // timeout to force safari to do the cancel xhr before the put xhr
               setTimeout(function () {
-                count.should.equal(4);
-                changes.cancel();
-                done();
-              }, 500);
+                remote.put(doc2);
+                // This setTimeout is needed to ensure no further changes come
+                // through
+                setTimeout(function () {
+                  count.should.equal(4);
+                  changes.cancel();
+                  done();
+                }, 500);
+              }, 1);
             }
           }
         });
