@@ -73,7 +73,8 @@
     "build-site": "./bin/build-site.js",
     "shell": "./bin/repl.js",
     "report-coverage": "./bin/run-coverage.js",
-    "build-perf": "browserify tests/performance/*.js > dist/performance-bundle.js"
+    "build-perf": "browserify tests/performance/*.js > dist/performance-bundle.js",
+    "build-cordova": "./bin/build-cordova.sh"
   },
   "browser": {
     "./deps/buffer": false,

@@ -36,22 +36,30 @@ window.app = {
   // The scope of 'this' is the event. In order to call the 'receivedEvent'
   // function, we must explicity call 'app.receivedEvent(...);'
   onDeviceReady: function () {
-    window.app.receivedEvent('deviceready');
+    var script = document.createElement('script');
+    script.src = 'tests/all-test-files.js';
+    document.getElementsByTagName('body')[0].appendChild(script);
+    var intervalId = window.setInterval(function () {
+      if (window.allTestFiles) {
+        clearInterval(intervalId);
+        window.app.init('deviceready');
+      }
+    }, 10);
   },
   // Update DOM on a Received Event
-  receivedEvent: function (id) {
+  init: function (id) {
     var testFile = document.getElementById("testfile");
-    var allTestFiles = [];
-    var scripts = document.getElementsByTagName('script');
-    for (var i = 0; i < scripts.length; i++) {
-      allTestFiles.push(scripts[i].getAttribute('src'));
-    }
-    for (var index in allTestFiles) {
-      var file = allTestFiles[index];
+    var testFiles = window.allTestFiles.slice().sort();
+    for (var i = 0; i < testFiles.length; i++) {
+      var file = testFiles[i];
       testFile.options[testFile.options.length] = new Option(file, file);
     }
     var host = document.getElementById("host");
-    host.value = 'http://10.0.2.2:5984';
+    if (window.localStorage && window.localStorage['couchdb_host']) {
+      host.value = window.localStorage['couchdb_host'];
+    } else {
+      host.value = 'http://10.0.2.2:5984';
+    }
 
     var parentElement = document.getElementById(id);
     var listeningElement = parentElement.querySelector('.listening');
@@ -60,12 +68,23 @@ window.app = {
     listeningElement.setAttribute('style', 'display:none;');
     receivedElement.setAttribute('style', 'display:block;');
 
-    console.log('Received Event: ' + id);
+    console.log('Initialized!');
   },
   // go to test page
   test: function () {
     var testFile = document.getElementById("testfile");
     var host = document.getElementById("host");
-    window.location = "tests/test.html?testFiles=" + testFile.value + "&host=" + host.value;
+
+    if (window.localStorage) {
+      window.localStorage['couchdb_host'] = host.value;
+    }
+
+    var url = "tests/test.html?host=" + host.value;
+    if (testFile.value) {
+      url += "&grep=" + testFile.value.match(/([^\.]+)\.js/)[1];
+    }
+    console.log('url is ' + url);
+
+    window.location = url;
   }
 };
